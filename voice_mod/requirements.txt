@@ -1,0 +1,5 @@
+ollama
+RealtimeSTT
+faster-whisper
+silero-vad
+pytest>=8.0
