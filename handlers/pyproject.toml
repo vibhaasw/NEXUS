@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "voice-mod-handlers"
+version = "0.1.0"
+description = "Handler plugins for Voice Mod — task routing handlers for voice control."
+requires-python = ">=3.11"
+dependencies = [
+  "ollama",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+]
+
+[tool.setuptools]
+packages = ["handlers"]
+
+[tool.setuptools.package-dir]
+handlers = "."

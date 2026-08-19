@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: voice-mod-handlers
+Version: 0.1.0
+Summary: Handler plugins for Voice Mod — task routing handlers for voice control.
+Requires-Python: >=3.11
+Requires-Dist: ollama
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"

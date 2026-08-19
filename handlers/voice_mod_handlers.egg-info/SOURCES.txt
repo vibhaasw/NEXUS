@@ -1,0 +1,13 @@
+pyproject.toml
+./__init__.py
+./base.py
+./code_handler.py
+./edit_file_handler.py
+./open_app_handler.py
+./qa_handler.py
+./web_search_handler.py
+voice_mod_handlers.egg-info/PKG-INFO
+voice_mod_handlers.egg-info/SOURCES.txt
+voice_mod_handlers.egg-info/dependency_links.txt
+voice_mod_handlers.egg-info/requires.txt
+voice_mod_handlers.egg-info/top_level.txt
