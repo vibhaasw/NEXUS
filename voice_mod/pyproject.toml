@@ -13,6 +13,7 @@ dependencies = [
   "RealtimeSTT",
   "faster-whisper",
   "silero-vad",
+  "voice-mod-handlers",
 ]
 
 [project.optional-dependencies]

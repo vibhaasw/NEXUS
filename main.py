@@ -3,6 +3,10 @@ from __future__ import annotations
 
 import sys
 
+from load_env import load_dotenv
+
+load_dotenv()
+
 from voice_control.audio import AudioController
 from voice_control.config import load_config
 from voice_control.llm import create_ollama_client, healthcheck
@@ -11,6 +15,7 @@ from voice_control.stt import RealtimeSpeechToText
 from voice_control.utils import configure_logging
 from handlers import (
     CodeHandler,
+    DelegateAIHandler,
     EditFileHandler,
     HandlerRegistry,
     OpenAppHandler,
@@ -26,6 +31,7 @@ def _build_registry(client, model: str) -> HandlerRegistry:
     registry.register(WebSearchHandler())
     registry.register(OpenAppHandler())
     registry.register(EditFileHandler())
+    registry.register(DelegateAIHandler(client, model))
     return registry
 
 
@@ -71,7 +77,8 @@ def main() -> int:
             routed = router.route(transcript.text)
 
             status = "OK" if routed.success else "FAILED"
-            print(f"[{routed.handler_name}] ({status})")
+            route_tag = "auto-delegated" if routed.auto_delegated else "routed"
+            print(f"[{routed.handler_name}] ({status}, {route_tag})")
             print(f"  {routed.reply}")
 
             if routed.raw_args:

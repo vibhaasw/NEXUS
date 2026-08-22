@@ -1,0 +1,164 @@
+{
+  "providers": [
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "kind": "api",
+      "adapter": "openai_compatible",
+      "base_url": "https://api.openai.com/v1",
+      "priority": 10,
+      "capabilities": ["code", "reasoning", "vision", "long_context", "fast", "creative"],
+      "models": {
+        "code": "gpt-4o",
+        "reasoning": "gpt-4o",
+        "creative": "gpt-4o",
+        "vision": "gpt-4o",
+        "fast_lookup": "gpt-4o-mini",
+        "long_context": "gpt-4o"
+      },
+      "accounts": [
+        {"env_key": "OPENAI_API_KEY_1", "label": "openai-primary"},
+        {"env_key": "OPENAI_API_KEY_2", "label": "openai-secondary"}
+      ]
+    },
+    {
+      "id": "gemini",
+      "name": "Google Gemini",
+      "kind": "api",
+      "adapter": "gemini",
+      "base_url": "https://generativelanguage.googleapis.com",
+      "priority": 20,
+      "capabilities": ["code", "reasoning", "vision", "long_context", "fast", "creative"],
+      "models": {
+        "code": "gemini-2.5-flash",
+        "reasoning": "gemini-2.5-flash",
+        "creative": "gemini-2.5-flash",
+        "vision": "gemini-2.5-flash",
+        "fast_lookup": "gemini-2.5-flash",
+        "long_context": "gemini-2.5-flash"
+      },
+      "accounts": [
+        {"env_key": "GEMINI_API_KEY_1", "label": "gemini-primary"},
+        {"env_key": "GEMINI_API_KEY_2", "label": "gemini-secondary"}
+      ]
+    },
+    {
+      "id": "anthropic",
+      "name": "Anthropic",
+      "kind": "api",
+      "adapter": "anthropic",
+      "base_url": "https://api.anthropic.com",
+      "priority": 30,
+      "capabilities": ["code", "reasoning", "long_context", "creative"],
+      "models": {
+        "code": "claude-sonnet-4-20250514",
+        "reasoning": "claude-sonnet-4-20250514",
+        "creative": "claude-sonnet-4-20250514",
+        "long_context": "claude-sonnet-4-20250514",
+        "fast_lookup": "claude-3-5-haiku-latest"
+      },
+      "accounts": [
+        {"env_key": "ANTHROPIC_API_KEY", "label": "anthropic-primary"}
+      ]
+    },
+    {
+      "id": "groq",
+      "name": "Groq",
+      "kind": "api",
+      "adapter": "openai_compatible",
+      "base_url": "https://api.groq.com/openai/v1",
+      "priority": 40,
+      "capabilities": ["code", "reasoning", "fast"],
+      "models": {
+        "code": "llama-3.3-70b-versatile",
+        "reasoning": "llama-3.3-70b-versatile",
+        "fast_lookup": "llama-3.3-70b-versatile"
+      },
+      "accounts": [
+        {"env_key": "GROQ_API_KEY", "label": "groq-primary"}
+      ]
+    },
+    {
+      "id": "mistral",
+      "name": "Mistral",
+      "kind": "api",
+      "adapter": "openai_compatible",
+      "base_url": "https://api.mistral.ai/v1",
+      "priority": 50,
+      "capabilities": ["code", "reasoning", "fast", "creative"],
+      "models": {
+        "code": "mistral-large-latest",
+        "reasoning": "mistral-large-latest",
+        "fast_lookup": "mistral-small-latest",
+        "creative": "mistral-large-latest"
+      },
+      "accounts": [
+        {"env_key": "MISTRAL_API_KEY", "label": "mistral-primary"}
+      ]
+    },
+    {
+      "id": "deepseek",
+      "name": "DeepSeek",
+      "kind": "api",
+      "adapter": "openai_compatible",
+      "base_url": "https://api.deepseek.com/v1",
+      "priority": 60,
+      "capabilities": ["code", "reasoning"],
+      "models": {
+        "code": "deepseek-chat",
+        "reasoning": "deepseek-chat",
+        "fast_lookup": "deepseek-chat"
+      },
+      "accounts": [
+        {"env_key": "DEEPSEEK_API_KEY", "label": "deepseek-primary"}
+      ]
+    },
+    {
+      "id": "openrouter",
+      "name": "OpenRouter",
+      "kind": "api",
+      "adapter": "openai_compatible",
+      "base_url": "https://openrouter.ai/api/v1",
+      "priority": 70,
+      "capabilities": ["code", "reasoning", "vision", "long_context", "fast", "creative"],
+      "models": {
+        "code": "openai/gpt-4o",
+        "reasoning": "openai/gpt-4o",
+        "creative": "anthropic/claude-3.5-sonnet",
+        "vision": "openai/gpt-4o",
+        "fast_lookup": "google/gemini-2.0-flash-exp:free",
+        "long_context": "openai/gpt-4o"
+      },
+      "accounts": [
+        {"env_key": "OPENROUTER_API_KEY", "label": "openrouter-primary"}
+      ]
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "kind": "app_session",
+      "priority": 80,
+      "capabilities": ["code", "reasoning"],
+      "launch_target": "cursor",
+      "accounts": []
+    },
+    {
+      "id": "claude_app",
+      "name": "Claude Desktop",
+      "kind": "app_session",
+      "priority": 90,
+      "capabilities": ["reasoning", "creative", "long_context"],
+      "launch_target": "claude",
+      "accounts": []
+    },
+    {
+      "id": "copilot",
+      "name": "GitHub Copilot",
+      "kind": "app_session",
+      "priority": 100,
+      "capabilities": ["code"],
+      "launch_target": "copilot",
+      "accounts": []
+    }
+  ]
+}

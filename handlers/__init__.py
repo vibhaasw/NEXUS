@@ -6,6 +6,7 @@ from handlers.code_handler import CodeHandler
 from handlers.web_search_handler import WebSearchHandler
 from handlers.open_app_handler import OpenAppHandler
 from handlers.edit_file_handler import EditFileHandler
+from handlers.delegate_ai_handler import DelegateAIHandler
 
 __all__ = [
     "HandlerResult",
@@ -16,4 +17,5 @@ __all__ = [
     "WebSearchHandler",
     "OpenAppHandler",
     "EditFileHandler",
+    "DelegateAIHandler",
 ]

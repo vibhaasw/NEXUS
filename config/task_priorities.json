@@ -1,0 +1,52 @@
+{
+  "_comment": "Edit this file to control routing. First entry = first choice. Format: provider_id/account_label",
+  "priorities": {
+    "default": [
+      "openai/openai-primary",
+      "openai/openai-secondary",
+      "gemini/gemini-primary",
+      "gemini/gemini-secondary",
+      "anthropic/anthropic-primary",
+      "groq/groq-primary",
+      "openrouter/openrouter-primary"
+    ],
+    "code": [
+      "openai/openai-primary",
+      "openai/openai-secondary",
+      "gemini/gemini-primary",
+      "deepseek/deepseek-primary",
+      "groq/groq-primary"
+    ],
+    "reasoning": [
+      "gemini/gemini-primary",
+      "gemini/gemini-secondary",
+      "openai/openai-primary",
+      "anthropic/anthropic-primary"
+    ],
+    "creative": [
+      "openai/openai-primary",
+      "gemini/gemini-primary",
+      "anthropic/anthropic-primary"
+    ],
+    "vision": [
+      "gemini/gemini-primary",
+      "openai/openai-primary"
+    ],
+    "fast_lookup": [
+      "groq/groq-primary",
+      "gemini/gemini-primary",
+      "openai/openai-primary"
+    ],
+    "long_context": [
+      "gemini/gemini-primary",
+      "openai/openai-primary",
+      "anthropic/anthropic-primary"
+    ]
+  },
+  "app_handoff": {
+    "default": ["cursor"],
+    "code": ["cursor", "copilot"],
+    "creative": ["claude_app"],
+    "reasoning": ["claude_app", "cursor"]
+  }
+}
