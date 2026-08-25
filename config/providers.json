@@ -30,12 +30,12 @@
       "priority": 20,
       "capabilities": ["code", "reasoning", "vision", "long_context", "fast", "creative"],
       "models": {
-        "code": "gemini-2.5-flash",
-        "reasoning": "gemini-2.5-flash",
-        "creative": "gemini-2.5-flash",
-        "vision": "gemini-2.5-flash",
-        "fast_lookup": "gemini-2.5-flash",
-        "long_context": "gemini-2.5-flash"
+        "code": "gemini-3.6-flash",
+        "reasoning": "gemini-3.6-flash",
+        "creative": "gemini-3.6-flash",
+        "vision": "gemini-3.6-flash",
+        "fast_lookup": "gemini-3.6-flash",
+        "long_context": "gemini-3.6-flash"
       },
       "accounts": [
         {"env_key": "GEMINI_API_KEY_1", "label": "gemini-primary"},

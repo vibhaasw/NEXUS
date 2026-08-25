@@ -4,7 +4,10 @@ import re
 
 from dispatch.classifier import ClassificationResult
 
-_OPEN_RE = re.compile(r"\b(?:open|launch|start|run)\s+(.+)", re.IGNORECASE)
+_OPEN_RE = re.compile(
+    r"\b(?:open|launch)\s+([a-zA-Z0-9._+\-]+(?:\s+[a-zA-Z0-9._+\-]+)?)",
+    re.IGNORECASE,
+)
 _SEARCH_RE = re.compile(
     r"\b(?:search the web for|search for|google|look up online)\s+(.+)",
     re.IGNORECASE,
@@ -42,35 +45,48 @@ def parse_local_action(transcript: str) -> tuple[str, dict[str, str]] | None:
 
 def should_auto_delegate(classification: ClassificationResult) -> bool:
     """
-    Decide if this request should go to external AI automatically.
-    Uses classifier tags only — the user never has to say 'use external AI'.
+    Local classifier decides when a task needs an external AI.
+
+    Local Ollama / handlers keep:
+      - fast_lookup, low complexity, medium reasoning/creative chat
+
+    External AI (Gemini/OpenAI/…) gets:
+      - high complexity
+      - vision
+      - medium+ code (heavier coding than local Q&A)
     """
+    if classification.task_type == "fast_lookup":
+        return False
+
+    if classification.complexity == "low":
+        return False
+
     if classification.complexity == "high":
         return True
 
     if classification.task_type == "vision":
         return True
 
-    if "long_context" in classification.capabilities_required:
+    if classification.task_type == "code" and classification.complexity == "medium":
         return True
 
-    if classification.task_type in {"code", "reasoning", "creative", "long_context"}:
-        if classification.complexity == "medium":
-            return True
-
-    if classification.suggested_provider:
-        return True
-
+    # medium reasoning / creative → local model answers
     return False
 
 
+def prefers_local_answer(classification: ClassificationResult) -> bool:
+    """True when local Ollama should answer without calling cloud APIs."""
+    return not should_auto_delegate(classification)
+
+
 def routing_hint(classification: ClassificationResult) -> str:
-    """Short hint injected into the router when auto-delegate is not forced."""
+    """Short hint injected into the local tool-calling router."""
     delegate = should_auto_delegate(classification)
     return (
         f"task_type={classification.task_type}, "
         f"complexity={classification.complexity}, "
         f"capabilities={classification.capabilities_required}, "
         f"suggested_provider={classification.suggested_provider}, "
-        f"auto_delegate={'yes' if delegate else 'no'}"
+        f"auto_delegate={'yes' if delegate else 'no'}, "
+        f"prefer_local={'yes' if not delegate else 'no'}"
     )

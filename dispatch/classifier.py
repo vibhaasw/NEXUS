@@ -31,9 +31,10 @@ class ClassificationResult:
 
 
 def default_classification(request: str) -> ClassificationResult:
+    # Low complexity so a classifier hiccup never forces auto-delegation.
     return ClassificationResult(
         task_type="reasoning",
-        complexity="medium",
+        complexity="low",
         capabilities_required=[],
         simplified_prompt=request.strip(),
         suggested_provider=None,

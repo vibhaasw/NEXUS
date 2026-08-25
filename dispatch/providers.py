@@ -55,9 +55,20 @@ def _http_post_json(
     except urllib.error.HTTPError as exc:
         response_headers = _normalize_headers(exc.headers)
         detail = exc.read().decode("utf-8", errors="replace")
-        if exc.code == 429:
+        detail_lower = detail.lower()
+        quota_exhausted = (
+            "insufficient_quota" in detail_lower
+            or "exceeded your current quota" in detail_lower
+            or "resource_exhausted" in detail_lower
+        )
+        if exc.code == 429 or quota_exhausted:
             retry_after = response_headers.get("retry-after")
-            retry_seconds = float(retry_after) if retry_after else None
+            if retry_after:
+                retry_seconds = float(retry_after)
+            elif quota_exhausted:
+                retry_seconds = 3600.0
+            else:
+                retry_seconds = 60.0
             raise RateLimitError(detail or "Rate limited", retry_after=retry_seconds) from exc
         raise ProviderError(f"HTTP {exc.code}: {detail}") from exc
     except urllib.error.URLError as exc:

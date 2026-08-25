@@ -13,6 +13,7 @@ from dispatch.classifier import TaskClassifier
 from dispatch.routing_policy import (
     looks_like_local_action,
     parse_local_action,
+    prefers_local_answer,
     routing_hint,
     should_auto_delegate,
 )
@@ -131,23 +132,35 @@ class IntentRouter:
             classification.suggested_provider,
         )
 
-        if not looks_like_local_action(transcript) and should_auto_delegate(classification):
-            delegate = self._registry.get("delegate_to_external_ai")
-            if delegate:
-                LOGGER.info("Auto-delegating to external AI (no user trigger phrase needed)")
-                result = delegate.execute(request=transcript)
-                return RoutedResponse(
-                    handler_name=result.handler_name,
-                    reply=result.output,
-                    success=result.success,
-                    raw_args=result.raw_args,
-                    auto_delegated=True,
-                )
+        # Clear local Q&A: skip tool-calling so we don't mis-route facts to search_web.
+        if (
+            prefers_local_answer(classification)
+            and classification.task_type in {"fast_lookup", "reasoning", "creative"}
+            and classification.complexity in {"low", "medium"}
+            and not looks_like_local_action(transcript)
+        ):
+            LOGGER.info(
+                "Local classifier → answer_question (%s/%s)",
+                classification.task_type,
+                classification.complexity,
+            )
+            return self._fallback_qa(transcript, reason="local classifier Q&A")
 
+        # Local model decides the handler. Classifier only tags + hints.
+        # Include delegate_to_external_ai only when tags say the task is hard enough.
         tools = self._registry.ollama_tools()
+        allow_external = should_auto_delegate(classification)
+        if not allow_external:
+            tools = [t for t in tools if t.get("function", {}).get("name") != "delegate_to_external_ai"]
+
         hint = routing_hint(classification)
         user_message = f"Routing hint: {hint}\n\nUser request: {transcript}"
-        LOGGER.debug("Routing transcript with %d tools: %s", len(tools), self._registry.handler_names())
+        LOGGER.info(
+            "Local router deciding handler (external_allowed=%s, tools=%d)",
+            allow_external,
+            len(tools),
+        )
+        LOGGER.debug("Tools: %s", [t.get("function", {}).get("name") for t in tools])
 
         try:
             response = self._client.chat(

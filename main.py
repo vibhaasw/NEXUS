@@ -82,7 +82,14 @@ def main() -> int:
             print(f"  {routed.reply}")
 
             if routed.raw_args:
-                print(f"  Args: {routed.raw_args}")
+                attempts = routed.raw_args.get("attempts")
+                args_without_attempts = {
+                    k: v for k, v in routed.raw_args.items() if k != "attempts"
+                }
+                if args_without_attempts:
+                    print(f"  Args: {args_without_attempts}")
+                if attempts:
+                    print(f"  Attempts: {attempts}")
 
     except KeyboardInterrupt:
         print("\nInterrupted.")

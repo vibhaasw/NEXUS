@@ -66,7 +66,7 @@ def test_parse_classification_malformed_json_falls_back():
 
     assert result.used_fallback is True
     assert result.task_type == "reasoning"
-    assert result.complexity == "medium"
+    assert result.complexity == "low"
     assert result.simplified_prompt == "explain quantum computing"
     assert result.suggested_provider is None
 
@@ -124,11 +124,22 @@ def test_openai_provider_parses_response(monkeypatch):
 def test_orchestrator_api_dispatch(monkeypatch, providers_path, tmp_path):
     monkeypatch.setenv("TEST_OPENAI_KEY", "fake-key")
 
+    priorities = {
+        "priorities": {
+            "default": ["openai/test-openai"],
+            "reasoning": ["openai/test-openai"],
+        },
+        "app_handoff": {"default": ["cursor"]},
+    }
+    priorities_path = tmp_path / "task_priorities.json"
+    priorities_path.write_text(json.dumps(priorities), encoding="utf-8")
+
     mock_client = MagicMock()
     orchestrator = AIOrchestrator(
         mock_client,
         "test-model",
         providers_path=providers_path,
+        priorities_path=priorities_path,
         key_pool=KeyPool(state_path=tmp_path / "usage_state.json"),
     )
 
@@ -175,6 +186,15 @@ def test_orchestrator_switches_account_on_429(monkeypatch, tmp_path):
     }
     path = tmp_path / "providers.json"
     path.write_text(json.dumps(catalog), encoding="utf-8")
+    priorities = {
+        "priorities": {
+            "default": ["openai/acct-a", "openai/acct-b"],
+            "reasoning": ["openai/acct-a", "openai/acct-b"],
+        },
+        "app_handoff": {"default": []},
+    }
+    priorities_path = tmp_path / "task_priorities.json"
+    priorities_path.write_text(json.dumps(priorities), encoding="utf-8")
     monkeypatch.setenv("KEY_A", "a")
     monkeypatch.setenv("KEY_B", "b")
 
@@ -182,10 +202,12 @@ def test_orchestrator_switches_account_on_429(monkeypatch, tmp_path):
         MagicMock(),
         "test-model",
         providers_path=path,
+        priorities_path=priorities_path,
         key_pool=KeyPool(state_path=tmp_path / "usage_state.json"),
     )
     classification = default_classification("Explain async Rust.")
     classification.simplified_prompt = "Explain async Rust."
+    classification.task_type = "reasoning"
     monkeypatch.setattr(orchestrator, "_classifier", MagicMock(classify=lambda _: classification))
 
     calls: list[str] = []
@@ -212,16 +234,25 @@ def test_orchestrator_switches_account_on_429(monkeypatch, tmp_path):
 
 
 def test_orchestrator_app_session_handoff(monkeypatch, providers_path, tmp_path):
+    priorities = {
+        "priorities": {"default": [], "reasoning": []},
+        "app_handoff": {"default": ["cursor"], "code": ["cursor"]},
+    }
+    priorities_path = tmp_path / "task_priorities.json"
+    priorities_path.write_text(json.dumps(priorities), encoding="utf-8")
+
     mock_client = MagicMock()
     orchestrator = AIOrchestrator(
         mock_client,
         "test-model",
         providers_path=providers_path,
+        priorities_path=priorities_path,
         key_pool=KeyPool(state_path=tmp_path / "usage_state.json"),
     )
 
     classification = default_classification("Refactor this module")
     classification.simplified_prompt = "Refactor this module"
+    classification.task_type = "code"
     classification.capabilities_required = ["code"]
     classification.suggested_provider = "cursor"
     monkeypatch.setattr(orchestrator, "_classifier", MagicMock(classify=lambda _: classification))
