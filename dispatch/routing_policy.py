@@ -4,8 +4,13 @@ import re
 
 from dispatch.classifier import ClassificationResult
 
+_OPEN_IN_BROWSER_RE = re.compile(
+    r"\b(?:open|launch)\s+(.+?)\s+(?:in|with|using|via)\s+"
+    r"([a-zA-Z0-9._+\-]+(?:\s+(?!for\b|me\b|please\b|now\b)[a-zA-Z0-9._+\-]+)?)",
+    re.IGNORECASE,
+)
 _OPEN_RE = re.compile(
-    r"\b(?:open|launch)\s+([a-zA-Z0-9._+\-]+(?:\s+[a-zA-Z0-9._+\-]+)?)",
+    r"\b(?:open|launch)\s+(.+?)(?:\s+(?:please|for me|now))?\s*$",
     re.IGNORECASE,
 )
 _SEARCH_RE = re.compile(
@@ -14,15 +19,32 @@ _SEARCH_RE = re.compile(
 )
 _EDIT_RE = re.compile(r"\b(?:edit|modify|open file)\s+(.+)", re.IGNORECASE)
 
+_APP_FILLER = re.compile(
+    r"\b(the|a|an|my|app|application|please|for me|on my (?:computer|desktop)|now)\b",
+    re.IGNORECASE,
+)
+
+
+def _clean_app_target(raw: str) -> str:
+    text = raw.strip(" .,\"'!?")
+    text = _APP_FILLER.sub(" ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
 
 def looks_like_local_action(transcript: str) -> bool:
     """True when the user is clearly asking to act on the machine, not ask an AI."""
     lower = transcript.lower()
     return bool(
-        _OPEN_RE.search(transcript)
+        _OPEN_IN_BROWSER_RE.search(transcript)
+        or _OPEN_RE.search(transcript)
         or _SEARCH_RE.search(transcript)
         or _EDIT_RE.search(transcript)
         or re.search(r"\b(search the web|google|look up online)\b", lower)
+        or re.search(
+            r"\b(?:open|launch)\b.+\b(?:app|application|spotify|firefox|chrome|terminal)\b",
+            lower,
+        )
     )
 
 
@@ -37,8 +59,17 @@ def parse_local_action(transcript: str) -> tuple[str, dict[str, str]] | None:
     if m := _EDIT_RE.search(transcript):
         return "edit_file", {"file_path": m.group(1).strip(" .")}
 
+    # Generic: open <site|url> in|with <browser>
+    if m := _OPEN_IN_BROWSER_RE.search(transcript):
+        what = _clean_app_target(m.group(1))
+        browser = _clean_app_target(m.group(2))
+        if what and browser:
+            return "open_app", {"app": browser, "url": what, "target": f"{what} in {browser}"}
+
     if m := _OPEN_RE.search(transcript):
-        return "open_app", {"target": m.group(1).strip(" .")}
+        target = _clean_app_target(m.group(1))
+        if target:
+            return "open_app", {"target": target}
 
     return None
 
@@ -70,7 +101,6 @@ def should_auto_delegate(classification: ClassificationResult) -> bool:
     if classification.task_type == "code" and classification.complexity == "medium":
         return True
 
-    # medium reasoning / creative → local model answers
     return False
 
 

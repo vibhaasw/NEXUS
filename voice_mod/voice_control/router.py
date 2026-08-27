@@ -121,7 +121,38 @@ class IntentRouter:
                     reply=result.output,
                     success=result.success,
                     raw_args=result.raw_args,
+                    auto_delegated=False,
                 )
+
+        # Machine-action phrasing must never fall through to cloud auto-delegate.
+        if looks_like_local_action(transcript):
+            open_handler = self._registry.get("open_app")
+            if open_handler and re.search(r"\b(?:open|launch)\b", transcript, re.IGNORECASE):
+                # Last-resort: strip to likely app token(s).
+                cleaned = re.sub(
+                    r".*?\b(?:open|launch)\b",
+                    "",
+                    transcript,
+                    count=1,
+                    flags=re.IGNORECASE,
+                )
+                cleaned = re.sub(
+                    r"\b(the|a|an|my|app|application|please|for me|now)\b",
+                    " ",
+                    cleaned,
+                    flags=re.IGNORECASE,
+                )
+                cleaned = re.sub(r"\s+", " ", cleaned).strip(" .,\"'!?")
+                if cleaned:
+                    LOGGER.info("Local-action fallback open_app(%s)", cleaned)
+                    result = open_handler.execute(target=cleaned)
+                    return RoutedResponse(
+                        handler_name=result.handler_name,
+                        reply=result.output,
+                        success=result.success,
+                        raw_args=result.raw_args,
+                        auto_delegated=False,
+                    )
 
         classification = self._classifier.classify(transcript)
         LOGGER.info(

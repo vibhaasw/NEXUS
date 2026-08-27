@@ -56,7 +56,39 @@ def test_suggested_provider_alone_does_not_auto_delegate():
 def test_local_action_parse_open():
     name, args = parse_local_action("open firefox")
     assert name == "open_app"
-    assert args["target"] == "firefox"
+    assert args["target"].lower() == "firefox"
+
+
+def test_local_action_parse_open_site_in_browser():
+    cases = [
+        ("Open youtube in firefox for me", "firefox", "youtube"),
+        ("open github with chrome", "chrome", "github"),
+        ("launch reddit.com in brave", "brave", "reddit.com"),
+        ("open https://example.com in firefox", "firefox", "https://example.com"),
+    ]
+    for text, app, url in cases:
+        parsed = parse_local_action(text)
+        assert parsed is not None, text
+        name, args = parsed
+        assert name == "open_app", text
+        assert args["app"].lower() == app.lower(), text
+        assert args["url"].lower() == url.lower(), text
+
+
+def test_local_action_parse_spotify_variants():
+    cases = [
+        ("open Spotify", "Spotify"),
+        ("open the Spotify app", "Spotify"),
+        ("open Spotify please", "Spotify"),
+        ("can you open Spotify for me", "Spotify"),
+        ("launch Spotify application", "Spotify"),
+    ]
+    for text, expected in cases:
+        parsed = parse_local_action(text)
+        assert parsed is not None, text
+        name, args = parsed
+        assert name == "open_app"
+        assert args["target"].lower() == expected.lower(), text
 
 
 def test_local_action_parse_search():

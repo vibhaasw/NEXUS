@@ -2,6 +2,12 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
+
+# Prefer this repo's packages over any older editable installs.
+_ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(_ROOT))
+sys.path.insert(0, str(_ROOT / "voice_mod"))
 
 from load_env import load_dotenv
 
@@ -77,7 +83,9 @@ def main() -> int:
             routed = router.route(transcript.text)
 
             status = "OK" if routed.success else "FAILED"
-            route_tag = "auto-delegated" if routed.auto_delegated else "routed"
+            route_tag = (
+                "auto-delegated" if getattr(routed, "auto_delegated", False) else "routed"
+            )
             print(f"[{routed.handler_name}] ({status}, {route_tag})")
             print(f"  {routed.reply}")
 
