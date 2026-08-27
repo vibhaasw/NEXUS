@@ -1,4 +1,4 @@
-# NEXUS
+# NEXUS (NATIVE EXECUTABLE USERS SYSTEM)
 
 **A local-first voice assistant that classifies its own tasks and decides — on its own — when to answer locally, hand off to an external AI, or run an action on your machine.**
 
